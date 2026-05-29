@@ -1,0 +1,24 @@
+# Byte-compiled
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment & secrets
+.env
+cookies.json
+
+# Database
+data/*.db
+
+# Virtual env
+venv/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

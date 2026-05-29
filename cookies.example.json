@@ -1,0 +1,7 @@
+[
+    {"name": "cna", "value": "你的cna值", "domain": ".1688.com"},
+    {"name": "_m_h5_tk", "value": "你的tk值", "domain": ".1688.com"},
+    {"name": "_m_h5_tk_enc", "value": "你的tk_enc值", "domain": ".1688.com"},
+    {"name": "x5sec", "value": "你的x5sec值", "domain": ".1688.com"},
+    {"name": "JSESSIONID", "value": "你的session", "domain": ".1688.com"}
+]

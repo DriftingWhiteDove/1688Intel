@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>1688智选 — 电商情报工作站</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: #f5f7fa; color: #1a1a2e; min-height: 100vh; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 30px 0 20px; }
+        header h1 { font-size: 28px; background: linear-gradient(135deg, #ff6b35, #f7c948); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        header p { color: #666; margin-top: 4px; font-size: 14px; }
+        .tabs { display: flex; gap: 0; margin-bottom: 0; background: #fff; border-radius: 12px 12px 0 0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        .tab-btn { flex: 1; padding: 14px; text-align: center; cursor: pointer; border: none; background: transparent; font-size: 15px; color: #666; transition: all .2s; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: #ff6b35; border-bottom-color: #ff6b35; font-weight: 600; }
+        .tab-btn:hover { background: #fff8f0; }
+        .panel { display: none; background: #fff; padding: 24px; border-radius: 0 0 12px 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        .panel.active { display: block; }
+        label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #333; }
+        input[type=url] { width: 100%; padding: 12px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: border .2s; }
+        input[type=url]:focus { outline: none; border-color: #ff6b35; }
+        .hint { font-size: 12px; color: #999; margin-top: 4px; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 12px 28px; background: linear-gradient(135deg, #ff6b35, #f7a823); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 14px; transition: opacity .2s; }
+        .btn:hover { opacity: .9; }
+        .btn:disabled { opacity: .5; cursor: not-allowed; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .result { display: none; margin-top: 24px; }
+        .result.show { display: block; }
+        .score-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 24px; font-weight: 700; }
+        .score-h { background: #d4edda; color: #155724; }
+        .score-m { background: #fff3cd; color: #856404; }
+        .score-l { background: #f8d7da; color: #721c24; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+        .info-item { background: #f8f9fc; padding: 12px; border-radius: 8px; }
+        .info-item .label { font-size: 12px; color: #888; }
+        .info-item .value { font-size: 15px; font-weight: 600; margin-top: 2px; }
+        .risk-tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; margin: 3px 4px 3px 0; }
+        .risk-high { background: #f8d7da; color: #721c24; }
+        .risk-medium { background: #fff3cd; color: #856404; }
+        .risk-low { background: #d1ecf1; color: #0c5460; }
+        .section-title { font-size: 16px; font-weight: 600; margin: 20px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #f0f0f0; }
+        .error-box { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 14px; border-radius: 8px; margin-top: 14px; font-size: 14px; }
+        .profit-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+        .profit-table td { padding: 8px 12px; border: none; }
+        .profit-table tr td:last-child { text-align: right; font-weight: 600; }
+        .profit-table .total-row { border-top: 2px solid #e0e0e0; }
+        .profit-table .final-row { border-top: 2px solid #333; font-size: 15px; }
+        .advice-box { background: #f0f9ff; border: 1px solid #bae6fd; padding: 14px; border-radius: 8px; margin-top: 8px; line-height: 1.6; }
+        .badge-yes { display:inline-block; padding:2px 8px; border-radius:10px; font-size:12px; background:#d4edda; color:#155724; }
+        .badge-no { display:inline-block; padding:2px 8px; border-radius:10px; font-size:12px; background:#f8d7da; color:#721c24; }
+        .stars { color: #f7a823; font-size: 16px; letter-spacing: 2px; }
+        .bar-container { display:flex; height:8px; border-radius:4px; overflow:hidden; margin:4px 0; }
+        .bar-good { background:#22c55e; }
+        .bar-middle { background:#f59e0b; }
+        .bar-bad { background:#ef4444; }
+        .empty-state { text-align: center; padding: 40px 0; color: #aaa; }
+        .empty-state svg { width: 60px; height: 60px; margin-bottom: 12px; opacity: .5; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+        td, th { border: 1px solid #e5e7eb; padding: 10px 12px; text-align: left; }
+        th { background: #f9fafb; font-weight: 600; color: #555; }
+        .vendor-section { margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🔍 1688 智选</h1>
+        <p>AI 驱动的 1688 选品分析与供应商背调工具</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('product')">📦 商品分析</button>
+        <button class="tab-btn" onclick="switchTab('vendor')">🏭 供应商背调</button>
+    </div>
+
+    <div id="panel-product" class="panel active">
+        <label for="productUrl">1688 商品链接</label>
+        <input type="url" id="productUrl" placeholder="https://detail.1688.com/offer/xxxxxxxx.html" autocomplete="url">
+        <div class="hint">粘贴完整的 1688 商品详情页链接</div>
+        <button class="btn" id="productBtn" onclick="analyzeProduct()">开始分析</button>
+        <div id="productResult" class="result"></div>
+    </div>
+
+    <div id="panel-vendor" class="panel">
+        <label for="vendorUrl">1688 店铺链接</label>
+        <input type="url" id="vendorUrl" placeholder="https://shopxxx.1688.com/ 或 https://m.1688.com/winport/..." autocomplete="url">
+        <div class="hint">粘贴 1688 店铺首页链接（含 memberId 的 URL）</div>
+        <button class="btn" id="vendorBtn" onclick="checkVendor()">开始查询</button>
+        <div id="vendorResult" class="result"></div>
+    </div>
+</div>
+
+<script>
+function switchTab(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.querySelector(`.tab-btn[onclick*="'${name}'"]`).classList.add('active');
+}
+
+function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> 分析中...';
+    } else {
+        btn.disabled = false;
+        btn.innerHTML = btnId === 'productBtn' ? '开始分析' : '开始查询';
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text).replace(/[&<>"]/g, function(m) {
+        if (m === '&') return '&amp;'; if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;'; if (m === '"') return '&quot;';
+        return m;
+    });
+}
+
+function scoreClass(score) {
+    if (score >= 70) return 'score-h';
+    if (score >= 40) return 'score-m';
+    return 'score-l';
+}
+
+function riskClass(level) {
+    if (level === 'high') return 'risk-high';
+    if (level === 'medium') return 'risk-medium';
+    return 'risk-low';
+}
+
+async function analyzeProduct() {
+    const url = document.getElementById('productUrl').value.trim();
+    if (!url) { alert('请输入 1688 商品链接'); return; }
+
+    const resultDiv = document.getElementById('productResult');
+    resultDiv.classList.remove('show');
+    setLoading('productBtn', true);
+
+    try {
+        const resp = await fetch('/api/v1/product/analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({url})
+        });
+        const data = await resp.json();
+
+        if (!resp.ok) {
+            let errMsg = '请求失败';
+            if (typeof data.detail === 'string') {
+                errMsg = data.detail;
+            } else if (data.detail) {
+                errMsg = data.detail.message || data.detail.code || '请求失败';
+                if (data.detail.guide) {
+                    errMsg += '<br><br><strong>📖 Cookie 设置方法：</strong><br>'
+                        + '1. 打开 Chrome，登录 <a href="https://www.1688.com" target="_blank">1688.com</a><br>'
+                        + '2. F12 → Application → Cookies → 全选复制<br>'
+                        + '3. 安装 <a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm" target="_blank">Cookie-Editor</a> 扩展 → Export → 保存到 backend/cookies.json';
+                }
+            }
+            resultDiv.innerHTML = `<div class="error-box">❌ ${errMsg}</div>`;
+            resultDiv.classList.add('show');
+            return;
+        }
+
+        const sc = scoreClass(data.ai_score);
+        let risks = '';
+        if (data.risk_flags && data.risk_flags.length) {
+            risks = data.risk_flags.map(r =>
+                `<span class="risk-tag ${riskClass(r.level)}">${escapeHtml(r.item)}</span>`
+            ).join('');
+        }
+
+        // ── 利润计算器 ──
+        let profitHtml = '';
+        if (data.profit_estimate) {
+            const p = data.profit_estimate;
+            const netMarginClass = p.net_margin >= 20 ? 'score-h' : p.net_margin >= 10 ? 'score-m' : 'score-l';
+            const totalCost = (p.purchase_price + p.estimated_shipping_cost + p.taobao_fees).toFixed(2);
+            profitHtml = `
+                <div class="section-title">利润计算器</div>
+                <table class="profit-table">
+                    <tr><td>1688 进货价</td><td>¥${p.purchase_price}</td></tr>
+                    <tr><td>参考零售价</td><td>¥${p.reference_selling_price}</td></tr>
+                    <tr><td>估算运费</td><td>¥${p.estimated_shipping_cost}</td></tr>
+                    <tr><td>平台费用（约 7%）</td><td>¥${p.taobao_fees}</td></tr>
+                    <tr class="total-row"><td>总成本</td><td>¥${totalCost}</td></tr>
+                    <tr class="total-row"><td>毛利润</td><td>¥${p.estimated_profit}</td></tr>
+                    <tr class="total-row"><td>毛利率</td><td>${p.profit_margin}%</td></tr>
+                    <tr class="final-row"><td><strong>净利润</strong></td><td><strong>¥${p.net_profit}</strong></td></tr>
+                    <tr class="final-row"><td><strong>净利率</strong></td><td><strong class="${netMarginClass}" style="padding:2px 8px;border-radius:8px">${p.net_margin}%</strong></td></tr>
+                </table>
+                ${p.notes ? `<p style="color:#666;font-size:13px;margin-top:8px">${escapeHtml(p.notes)}</p>` : ''}`;
+        }
+
+        // ── 淘宝市场数据 ──
+        let marketHtml = '';
+        if (data.taobao_market) {
+            const tb = data.taobao_market;
+            marketHtml = `
+                <div class="section-title">淘宝市场数据</div>
+                <div class="info-grid">
+                    <div class="info-item"><div class="label">淘宝均价</div><div class="value">¥${tb.average_price}</div></div>
+                    <div class="info-item"><div class="label">价格区间</div><div class="value">¥${tb.min_price} ~ ¥${tb.max_price}</div></div>
+                    <div class="info-item"><div class="label">在售商品</div><div class="value">${tb.total_listings} 件</div></div>
+                    <div class="info-item"><div class="label">总销量</div><div class="value">${tb.total_sales_count}</div></div>
+                </div>`;
+        }
+
+        // ── 1688 竞争分析 ──
+        let compHtml = '';
+        if (data.competition && data.competition.total_suppliers > 0) {
+            const c = data.competition;
+            const compLevel = c.total_suppliers > 50 ? 'high' : c.total_suppliers > 20 ? 'medium' : 'low';
+            const compLabel = c.total_suppliers > 50 ? '红海' : c.total_suppliers > 20 ? '中等竞争' : '蓝海';
+            compHtml = `
+                <div class="section-title">1688 竞争分析</div>
+                <div class="info-grid">
+                    <div class="info-item"><div class="label">同款供应商</div><div class="value">${c.total_suppliers} 家</div></div>
+                    <div class="info-item"><div class="label">竞争程度</div><div class="value"><span class="risk-tag ${riskClass(compLevel)}">${compLabel}</span></div></div>
+                    <div class="info-item"><div class="label">同行进价区间</div><div class="value">¥${c.price_range_min} ~ ¥${c.price_range_max}</div></div>
+                </div>`;
+        }
+
+        // ── 供应商信息 ──
+        let supplierHtml = '';
+        if (data.supplier_info) {
+            const s = data.supplier_info;
+            const stars = '★'.repeat(Math.min(s.star_level, 5)) + '☆'.repeat(Math.max(5 - s.star_level, 0));
+            supplierHtml = `
+                <div class="section-title">供应商信息</div>
+                <div style="background:#f8f9fc;padding:16px;border-radius:12px;margin:8px 0">
+                    <div style="font-size:18px;font-weight:600">${escapeHtml(s.shop_name)}</div>
+                    <div style="margin:8px 0">
+                        <span class="stars">${stars}</span>
+                        ${s.trust_pass ? '<span class="badge-yes" style="margin-left:8px">诚信通 ✓</span>' : ''}
+                        ${s.gold_medal ? '<span class="badge-yes" style="margin-left:4px">金牌供应商</span>' : ''}
+                    </div>
+                    <div class="info-grid" style="margin-top:8px">
+                        <div class="info-item"><div class="label">经营年限</div><div class="value">${s.years_in_business} 年</div></div>
+                        <div class="info-item"><div class="label">所在地</div><div class="value">${escapeHtml(s.location)}</div></div>
+                        <div class="info-item"><div class="label">店铺类型</div><div class="value">${escapeHtml(s.shop_type)}</div></div>
+                    </div>
+                </div>`;
+        }
+
+        // ── 评价分布 ──
+        let evalHtml = '';
+        if (data.evaluation_summary) {
+            const e = data.evaluation_summary;
+            const total = e.total_reviews || 1;
+            const goodPct = (e.good_count / total * 100).toFixed(0);
+            const midPct = (e.middle_count / total * 100).toFixed(0);
+            const badPct = (e.bad_count / total * 100).toFixed(0);
+            evalHtml = `
+                <div class="section-title">评价分布（共 ${e.total_reviews} 条）</div>
+                <div style="margin-bottom:8px">
+                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+                        <span style="color:#22c55e">好评 ${e.good_count}</span>
+                        <span style="color:#f59e0b">中评 ${e.middle_count}</span>
+                        <span style="color:#ef4444">差评 ${e.bad_count}</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-good" style="width:${goodPct}%"></div>
+                        <div class="bar-middle" style="width:${midPct}%"></div>
+                        <div class="bar-bad" style="width:${badPct}%"></div>
+                    </div>
+                </div>`;
+        }
+
+        // ── 行动建议 ──
+        let adviceHtml = '';
+        if (data.actionable_advice) {
+            adviceHtml = `<div class="advice-box"><strong>行动建议</strong><br>${escapeHtml(data.actionable_advice)}</div>`;
+        }
+
+        // ── 渲染 ──
+        resultDiv.innerHTML = `
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+                <span class="score-badge ${sc}">${data.ai_score}</span>
+                <div><strong>AI 推荐评分</strong><p style="color:#555;margin-top:4px">${escapeHtml(data.ai_summary)}</p></div>
+            </div>
+            ${adviceHtml}
+            ${profitHtml}
+            ${marketHtml}
+            ${compHtml}
+            ${supplierHtml}
+            ${risks ? `<div class="section-title">风险提示</div><div>${risks}</div>` : ''}
+            <div class="section-title">商品信息</div>
+            <div class="info-grid">
+                <div class="info-item"><div class="label">标题</div><div class="value" style="font-size:13px">${escapeHtml(data.title)}</div></div>
+                <div class="info-item"><div class="label">价格区间</div><div class="value">¥${data.price_min} ~ ¥${data.price_max}</div></div>
+                <div class="info-item"><div class="label">月销量</div><div class="value">${data.monthly_sales ?? '暂无'}</div></div>
+                <div class="info-item"><div class="label">评分</div><div class="value">${data.avg_rating ?? '暂无'}</div></div>
+            </div>
+            ${evalHtml}
+        `;
+        resultDiv.classList.add('show');
+    } catch (e) {
+        resultDiv.innerHTML = `<div class="error-box">❌ 网络错误: ${escapeHtml(e.message)}</div>`;
+        resultDiv.classList.add('show');
+    } finally {
+        setLoading('productBtn', false);
+    }
+}
+
+async function checkVendor() {
+    const url = document.getElementById('vendorUrl').value.trim();
+    if (!url) { alert('请输入 1688 店铺链接'); return; }
+
+    const resultDiv = document.getElementById('vendorResult');
+    resultDiv.classList.remove('show');
+    setLoading('vendorBtn', true);
+
+    try {
+        const resp = await fetch('/api/v1/vendor/check', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({url})
+        });
+        const data = await resp.json();
+
+        if (!resp.ok) {
+            let errMsg = '请求失败';
+            if (typeof data.detail === 'string') {
+                errMsg = data.detail;
+            } else if (data.detail) {
+                errMsg = data.detail.message || data.detail.code || '请求失败';
+                if (data.detail.guide) {
+                    errMsg += '<br><br><strong>📖 Cookie 设置方法：</strong><br>'
+                        + '1. 打开 Chrome，登录 <a href="https://www.1688.com" target="_blank">1688.com</a><br>'
+                        + '2. F12 → Application → Cookies → 全选复制<br>'
+                        + '3. 安装 <a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm" target="_blank">Cookie-Editor</a> 扩展 → Export → 保存到 backend/cookies.json';
+                }
+            }
+            resultDiv.innerHTML = `<div class="error-box">❌ ${errMsg}</div>`;
+            resultDiv.classList.add('show');
+            return;
+        }
+
+        const sc = scoreClass(data.trust_score);
+        let companyHtml = '';
+        if (data.company_info) {
+            const c = data.company_info;
+            companyHtml = `
+                <div class="section-title">工商信息</div>
+                <table>
+                    <tr><th width="120">公司名称</th><td>${escapeHtml(c.company_name)}</td></tr>
+                    <tr><th>注册资本</th><td>${escapeHtml(c.reg_capital || '暂无')}</td></tr>
+                    <tr><th>成立时间</th><td>${escapeHtml(c.establish_date || '暂无')}</td></tr>
+                    <tr><th>法定代表人</th><td>${escapeHtml(c.legal_person || '暂无')}</td></tr>
+                    <tr><th>信用代码</th><td>${escapeHtml(c.credit_code || '暂无')}</td></tr>
+                </table>`;
+        }
+
+        resultDiv.innerHTML = `
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+                <span class="score-badge ${sc}">${data.trust_score}</span>
+                <div><strong>供应商信用评分</strong><p style="color:#555;margin-top:4px">${escapeHtml(data.ai_assessment)}</p></div>
+            </div>
+            <div class="section-title">基本信息</div>
+            <div class="info-grid">
+                <div class="info-item"><div class="label">店铺名</div><div class="value">${escapeHtml(data.shop_name)}</div></div>
+            </div>
+            <div class="section-title">刷单检测</div>
+            <p style="margin:8px 0;padding:12px;background:#f8f9fc;border-radius:8px">${escapeHtml(data.fake_review_warning)}</p>
+            ${companyHtml}
+        `;
+        resultDiv.classList.add('show');
+    } catch (e) {
+        resultDiv.innerHTML = `<div class="error-box">❌ 网络错误: ${escapeHtml(e.message)}</div>`;
+        resultDiv.classList.add('show');
+    } finally {
+        setLoading('vendorBtn', false);
+    }
+}
+</script>
+</body>
+</html>
