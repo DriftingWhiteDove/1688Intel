@@ -1,0 +1,12 @@
+.env
+venv/
+__pycache__/
+*.pyc
+.git
+.gitignore
+README.md
+export_cookies_guide.md
+start*.bat
+start*.ps1
+cookies.example.json
+cookies.json

@@ -1,0 +1,12 @@
+services:
+  backend:
+    build: .
+    container_name: 1688intel
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./cookies.json:/app/cookies.json
+    restart: unless-stopped
