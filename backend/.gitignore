@@ -6,14 +6,12 @@ __pycache__/
 # Environment & secrets
 .env
 cookies.json
-*.example.json
 
 # Database
 data/*.db
 
 # Virtual env
 venv/
-.venv/
 
 # OS
 Thumbs.db
@@ -24,6 +22,3 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
-
-# Docker
-/backend/.dockerignore
