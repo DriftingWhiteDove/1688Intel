@@ -58,15 +58,19 @@ start.bat
 ## 项目结构
 
 ```
-backend/
-├── app/
-│   ├── api/          # 路由层
-│   ├── core/         # 配置与数据库
-│   ├── models/       # 数据模型 & Schema
-│   ├── services/     # 业务逻辑（爬虫、分析、报告）
-│   ├── static/       # 静态资源
-│   └── templates/    # 前端模板
-├── data/             # SQLite 数据库
-├── cookies.json      # 1688 登录 Cookie（需自行配置）
-└── requirements.txt
+1688Intel/
+├── .claude/               # 项目配置 (CLAUDE.md)
+├── backend/
+│   ├── app/
+│   │   ├── api/          # 路由层
+│   │   ├── core/         # 配置与数据库
+│   │   ├── models/       # 数据模型 & Schema
+│   │   ├── services/     # 业务逻辑（爬虫、分析、报告）
+│   │   ├── static/       # 静态资源
+│   │   └── templates/    # 前端模板
+│   ├── data/             # SQLite 数据库
+│   ├── Dockerfile
+│   └── requirements.txt
+├── docs/                  # 设计文档
+└── docker-compose.yml
 ```
