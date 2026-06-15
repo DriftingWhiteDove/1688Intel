@@ -27,3 +27,6 @@ Thumbs.db
 
 # Docker
 /backend/.dockerignore
+
+# Frontend placeholder (unused)
+frontend/
