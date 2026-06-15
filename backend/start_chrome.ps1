@@ -14,7 +14,15 @@ $args = @(
     "--new-window",
     "about:blank"
 )
-Start-Process -FilePath "C:\Users\34678\AppData\Local\Google\Chrome\Application\chrome.exe" -ArgumentList $args
+# Auto-detect Chrome path
+$chromePaths = @(
+    "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe",
+    "$env:PROGRAMFILES\Google\Chrome\Application\chrome.exe",
+    "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe"
+)
+$chromeExe = $chromePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $chromeExe) { throw "Chrome not found, please set chromeExe path manually" }
+Start-Process -FilePath $chromeExe -ArgumentList $args
 
 Start-Sleep -Seconds 5
 
